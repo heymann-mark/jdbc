@@ -18,6 +18,32 @@ steps:
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
   
+
+- task: agent-capabilities@0
+  inputs:
+    personalAccessToken: '$(System.AccessToken)'
 - task: ShellScript@2
   inputs:
     scriptPath: 'build.sh'
+
+- task: AzureCLI@2
+  displayName: Azure CLI
+  inputs:
+    azureSubscription: <Name of the Azure Resource Manager service connection>
+    scriptType: bash
+    scriptLocation: inlineScript
+    arguments:
+      -SERVERNAME mydemoserver `
+      -DBNAME pollsdb `
+      -DBUSER pollsdbuser`
+      -DBPASSWORD pollsdbpassword
+    inlineScript: |
+      az login --allow-no-subscription
+      az postgres flexible-server execute --name $(SERVERNAME) \
+      --admin-user $(DBUSER) --admin-password '$(DBPASSWORD)' \
+      --database-name $(DBNAME) --file-path /code/sql/db-schema-update.sql
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '''$(System.DefaultWorkingDirectory)'''
+    Contents: '''**/target/*.?(war|jar)'''
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
