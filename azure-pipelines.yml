@@ -26,6 +26,7 @@ steps:
   inputs:
     scriptPath: 'build.sh'
 
+#Update the db
 - task: AzureCLI@2
   displayName: Azure CLI
   inputs:
@@ -42,6 +43,7 @@ steps:
       az postgres flexible-server execute --name $(SERVERNAME) \
       --admin-user $(DBUSER) --admin-password '$(DBPASSWORD)' \
       --database-name $(DBNAME) --file-path /code/sql/db-schema-update.sql
+#make jar file from backend
 - task: CopyFiles@2
   inputs:
     SourceFolder: '''$(System.DefaultWorkingDirectory)'''
